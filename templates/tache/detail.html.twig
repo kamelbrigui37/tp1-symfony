@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ tache.titre }}{% endblock %}
+
+{% block body %}
+    <h1>{{ tache.titre }}</h1>
+
+    <p>
+        <strong>Description :</strong>
+        {{ tache.description ?: 'Aucune description' }}
+    </p>
+
+    <p>
+        <strong>Date de création :</strong>
+        {{ tache.dateCreation|date('d/m/Y à H:i') }}
+    </p>
+
+    <p>
+        <strong>Statut :</strong>
+
+        {% if tache.terminee %}
+            <span class="badge bg-success">Terminée</span>
+        {% else %}
+            <span class="badge bg-warning text-dark">En cours</span>
+        {% endif %}
+    </p>
+
+    <a href="{{ path('app_taches') }}"
+       class="btn btn-outline-secondary">
+        ← Retour à la liste
+    </a>
+{% endblock %}

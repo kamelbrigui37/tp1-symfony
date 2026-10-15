@@ -22,29 +22,45 @@
                         <th>Auteur</th>
                         <th>Date</th>
                         <th>Statut</th>
+			<th>Actions<th>
                     </tr>
                 </thead>
 
                 <tbody>
-                    {% for article in articles %}
-                        <tr>
-                            <td class="text-center">{{ article.id }}</td>
-                            <td>
-    <a href="{{ path('app_article_detail', {'id': article.id}) }}">
-        {{ article.titre }}
-    </a>
-</td>
-                            <td>{{ article.auteur }}</td>
-                            <td>{{ article.dateCreation|date('d/m/Y') }}</td>
-                            <td class="text-center">
-                                {% if article.publie %}
-                                    <span class="badge bg-success">✅ Publié</span>
-                                {% else %}
-                                    <span class="badge bg-warning text-dark">Brouillon</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
+               {% for article in articles %}
+    <tr>
+        <td class="text-center">{{ article.id }}</td>
+
+        <td>
+            <a href="{{ path('app_article_detail', {'id': article.id}) }}">
+                {{ article.titre }}
+            </a>
+        </td>
+
+        <td>{{ article.auteur }}</td>
+
+        <td>{{ article.dateCreation|date('d/m/Y') }}</td>
+
+        <td class="text-center">
+            {% if article.publie %}
+                <span class="badge bg-success">✅ Publié</span>
+            {% else %}
+                <span class="badge bg-warning text-dark">Brouillon</span>
+            {% endif %}
+        </td>
+
+        {# Nouvelle colonne : Actions #}
+        <td class="text-center">
+            <a
+                href="{{ path('app_article_detail', {'id': article.id}) }}"
+                class="btn btn-outline-primary btn-sm"
+            >
+                Voir
+            </a>
+        </td>
+    </tr>
+{% endfor %}
+      
                 </tbody>
             </table>
         </div>

@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail de la catégorie{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+
+    <h1>{{ categorie.nom }}</h1>
+
+    <p>
+        <strong>Description :</strong>
+        {{ categorie.description ?: 'Aucune description' }}
+    </p>
+
+    <p>
+        <strong>Nombre d'articles :</strong>
+        {{ categorie.articles|length }}
+    </p>
+
+    <hr>
+
+    <h2>Articles de cette catégorie</h2>
+
+    {% if categorie.articles is empty %}
+        <p>Aucun article dans cette catégorie.</p>
+    {% else %}
+        <ul class="list-group mb-3">
+            {% for article in categorie.articles %}
+                <li class="list-group-item">
+                    <a href="{{ path('app_article_detail', {
+                        id: article.id
+                    }) }}">
+                        {{ article.titre }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <a
+        href="{{ path('app_article_nouveau', {
+            categorie: categorie.id
+        }) }}"
+        class="btn btn-success"
+    >
+        Créer un article dans cette catégorie
+    </a>
+
+    <a
+        href="{{ path('app_categorie_modifier', {
+            id: categorie.id
+        }) }}"
+        class="btn btn-primary"
+    >
+        Modifier
+    </a>
+
+    <form
+        method="post"
+        action="{{ path('app_categorie_supprimer', {
+            id: categorie.id
+        }) }}"
+        class="d-inline"
+        onsubmit="return confirm('Voulez-vous vraiment supprimer cette catégorie ?');"
+    >
+        <input
+            type="hidden"
+            name="_token"
+            value="{{ csrf_token('supprimer_categorie_' ~ categorie.id) }}"
+        >
+
+        <button type="submit" class="btn btn-danger">
+            Supprimer
+        </button>
+    </form>
+
+    <a href="{{ path('app_categories') }}" class="btn btn-secondary">
+        Retour à la liste
+    </a>
+
+</div>
+{% endblock %}

@@ -10,8 +10,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+
 class ArticlesController extends AbstractController
 {
+    // Afficher tous les articles
     #[Route('/articles', name: 'app_articles')]
     public function index(
         ArticleRepository $articleRepository
@@ -23,7 +26,9 @@ class ArticlesController extends AbstractController
         ]);
     }
 
+    // Créer un nouvel article
     #[Route('/articles/nouveau', name: 'app_article_nouveau')]
+    #[IsGranted('ROLE_USER')]
     public function nouveau(
         Request $request,
         EntityManagerInterface $em
@@ -38,6 +43,7 @@ class ArticlesController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $article->setAuteurUser($this->getUser());
             $em->persist($article);
             $em->flush();
 
@@ -54,6 +60,7 @@ class ArticlesController extends AbstractController
         ]);
     }
 
+    // Afficher les détails d'un article
     #[Route(
         '/articles/{id}',
         name: 'app_article_detail',
@@ -65,67 +72,89 @@ class ArticlesController extends AbstractController
             'article' => $article,
         ]);
     }
-#[Route(
-    '/articles/{id}/modifier',
-    name: 'app_article_modifier',
-    requirements: ['id' => '\d+']
-)]
-public function modifier(
-    Article $article,
-    Request $request,
-    EntityManagerInterface $em
-): Response {
-    $form = $this->createForm(ArticleType::class, $article);
 
-    $form->handleRequest($request);
+    // Modifier un article
+    #[Route(
+        '/articles/{id}/modifier',
+        name: 'app_article_modifier',
+        requirements: ['id' => '\d+']
+    )]
+    #[IsGranted('ROLE_USER')]
+    public function modifier(
+        Article $article,
+        Request $request,
+        EntityManagerInterface $em
+    ): Response {
+if (
+    $article->getAuteurUser() !== $this->getUser()
+    && !$this->isGranted('ROLE_ADMIN')
+) {
+    throw $this->createAccessDeniedException(
+        'Vous ne pouvez pas modifier cet article.'
+    );
+}
+        $form = $this->createForm(ArticleType::class, $article);
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        $em->flush();
+        $form->handleRequest($request);
 
-        $this->addFlash(
-            'success',
-            'Article modifié avec succès !'
-        );
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->flush();
 
-        return $this->redirectToRoute('app_article_detail', [
-            'id' => $article->getId(),
+            $this->addFlash(
+                'success',
+                'Article modifié avec succès !'
+            );
+
+            return $this->redirectToRoute('app_article_detail', [
+                'id' => $article->getId(),
+            ]);
+        }
+
+        return $this->render('articles/modifier.html.twig', [
+            'formulaire' => $form,
+            'article' => $article,
         ]);
     }
 
-    return $this->render('articles/modifier.html.twig', [
-        'formulaire' => $form,
-        'article' => $article,
-    ]);
+    // Supprimer un article
+    #[Route(
+        '/articles/{id}/supprimer',
+        name: 'app_article_supprimer',
+        requirements: ['id' => '\d+'],
+        methods: ['POST']
+    )]
+    #[IsGranted('ROLE_USER')]
+    public function supprimer(
+        Article $article,
+        Request $request,
+        EntityManagerInterface $em
+    ): Response {
+if (
+    $article->getAuteurUser() !== $this->getUser()
+    && !$this->isGranted('ROLE_ADMIN')
+) {
+    throw $this->createAccessDeniedException(
+        'Vous ne pouvez pas modifier cet article.'
+    );
 }
-#[Route(
-    '/articles/{id}/supprimer',
-    name: 'app_article_supprimer',
-    requirements: ['id' => '\d+'],
-    methods: ['POST']
-)]
-public function supprimer(
-    Article $article,
-    Request $request,
-    EntityManagerInterface $em
-): Response {
-    if ($this->isCsrfTokenValid(
-        'supprimer_' . $article->getId(),
-        $request->request->get('_token')
-    )) {
-        $em->remove($article);
-        $em->flush();
+        if ($this->isCsrfTokenValid(
+            'supprimer_' . $article->getId(),
+            $request->request->get('_token')
+        )) {
+            $em->remove($article);
+            $em->flush();
 
-        $this->addFlash(
-            'success',
-            'Article supprimé avec succès.'
-        );
-    } else {
-        $this->addFlash(
-            'danger',
-            'Token CSRF invalide. Suppression annulée.'
-        );
+            $this->addFlash(
+                'success',
+                'Article supprimé avec succès.'
+            );
+        } else {
+            $this->addFlash(
+                'danger',
+                'Token CSRF invalide. Suppression annulée.'
+            );
+        }
+
+        return $this->redirectToRoute('app_articles');
     }
-
-    return $this->redirectToRoute('app_articles');
-}
 }

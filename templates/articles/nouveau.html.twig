@@ -3,44 +3,147 @@
 {% block title %}Nouvel article{% endblock %}
 
 {% block body %}
-    <div class="row justify-content-center">
-        <div class="col-md-8">
 
-            <h1 class="mb-4">Créer un nouvel article</h1>
-
-            {{ form_start(formulaire) }}
-
-                <div class="mb-3">
-                    {{ form_row(formulaire.titre) }}
-                </div>
-
-                <div class="mb-3">
-                    {{ form_row(formulaire.contenu) }}
-                </div>
-
-                <div class="mb-3">
-                    {{ form_row(formulaire.auteur) }}
-                </div>
-
-                <div class="mb-3">
-                    {{ form_row(formulaire.datecreation) }}
-                </div>
-
-                <div class="mb-3">
-                    {{ form_row(formulaire.publie) }}
-                </div>
-<div class="mb-3">
-    {{ form_row(formulaire.categorie) }}
+<div class="page-heading">
+    <h1>
+        <i class="bi bi-file-earmark-plus me-2" style="color:#4f46e5;"></i>
+        Créer un nouvel article
+    </h1>
+    <p>Rédigez votre article et configurez ses informations avant de l'enregistrer.</p>
 </div>
-                {{ form_row(formulaire.enregistrer) }}
 
-            {{ form_end(formulaire) }}
+<div class="row justify-content-center">
 
-            <a href="{{ path('app_articles') }}"
-               class="btn btn-link mt-3 text-muted">
-                Retour à la liste
-            </a>
+    <div class="col-xl-9 col-lg-10">
 
+        <div class="card">
+
+            <div class="card-header">
+                <i class="bi bi-pencil-square me-2" style="color:#4f46e5;"></i>
+                Informations de l'article
+            </div>
+
+            <div class="card-body p-4">
+
+                {{ form_start(formulaire) }}
+
+                    {# Titre #}
+                    <div class="mb-4">
+                        {{ form_label(formulaire.titre) }}
+                        {{ form_widget(formulaire.titre, {
+                            attr: {
+                                class: 'form-control',
+                                placeholder: 'Exemple : Les nouvelles technologies en 2026'
+                            }
+                        }) }}
+                        {{ form_errors(formulaire.titre) }}
+                    </div>
+
+                    {# Contenu #}
+                    <div class="mb-4">
+                        {{ form_label(formulaire.contenu) }}
+                        {{ form_widget(formulaire.contenu, {
+                            attr: {
+                                class: 'form-control',
+                                rows: 7,
+                                placeholder: 'Écrivez le contenu de votre article ici...'
+                            }
+                        }) }}
+                        {{ form_errors(formulaire.contenu) }}
+                    </div>
+
+                    {# Auteur et date #}
+                    <div class="row">
+
+                        <div class="col-md-6 mb-4">
+                            {{ form_label(formulaire.auteur) }}
+                            {{ form_widget(formulaire.auteur, {
+                                attr: {
+                                    class: 'form-control',
+                                    placeholder: 'Nom de l’auteur'
+                                }
+                            }) }}
+                            {{ form_errors(formulaire.auteur) }}
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            {{ form_label(formulaire.datecreation) }}
+                            {{ form_widget(formulaire.datecreation, {
+                                attr: {
+                                    class: 'form-control'
+                                }
+                            }) }}
+                            {{ form_errors(formulaire.datecreation) }}
+                        </div>
+
+                    </div>
+
+                    {# Catégorie #}
+                    <div class="mb-4">
+                        {{ form_label(formulaire.categorie) }}
+                        {{ form_widget(formulaire.categorie, {
+                            attr: {
+                                class: 'form-select'
+                            }
+                        }) }}
+                        {{ form_errors(formulaire.categorie) }}
+                    </div>
+
+                    {# Publication #}
+                    <div class="p-3 mb-4 rounded-3"
+                         style="background:#f8fafc;border:1px solid #e5e7eb;">
+
+                        <div class="form-check">
+                            {{ form_widget(formulaire.publie, {
+                                attr: {
+                                    class: 'form-check-input'
+                                }
+                            }) }}
+
+                            {{ form_label(formulaire.publie, null, {
+                                label_attr: {
+                                    class: 'form-check-label fw-semibold'
+                                }
+                            }) }}
+                        </div>
+
+                        <small class="text-muted d-block mt-2">
+                            Cochez cette option pour marquer l'article comme publié.
+                        </small>
+
+                        {{ form_errors(formulaire.publie) }}
+
+                    </div>
+
+                    {# Boutons #}
+                    <div class="d-flex flex-wrap gap-2 justify-content-between pt-3 border-top">
+
+                        <a href="{{ path('app_articles') }}"
+                           class="btn btn-light border px-4">
+                            <i class="bi bi-arrow-left me-2"></i>
+                            Retour
+                        </a>
+
+                        {{ form_widget(formulaire.enregistrer, {
+                            label: 'Enregistrer l’article',
+                            attr: {
+                                class: 'btn btn-primary px-4'
+                            }
+                        }) }}
+
+                    </div>
+
+                {{ form_end(formulaire) }}
+
+            </div>
         </div>
+
+        <div class="text-muted small mt-3">
+            <i class="bi bi-shield-check me-1"></i>
+            Les champs sont soumis aux règles de validation de l'application.
+        </div>
+
     </div>
+</div>
+
 {% endblock %}

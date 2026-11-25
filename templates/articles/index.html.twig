@@ -5,7 +5,6 @@
 {% block body %}
 
     <style>
-        /* Page heading */
         .page-heading {
             margin-bottom: 30px;
         }
@@ -21,7 +20,6 @@
             margin-bottom: 0;
         }
 
-        /* Statistics cards */
         .stat-card {
             border: none;
             border-radius: 14px;
@@ -33,14 +31,12 @@
             transform: translateY(-3px);
         }
 
-        /* Articles grid */
         .articles-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 24px;
         }
 
-        /* Article card */
         .article-card {
             background: #ffffff;
             border: 1px solid #e2e8f0;
@@ -57,7 +53,6 @@
             box-shadow: 0 12px 30px rgba(15, 23, 42, 0.09);
         }
 
-        /* Card header */
         .article-card-header {
             padding: 22px 22px 16px;
             background: linear-gradient(135deg, #eef2ff, #f8fafc);
@@ -83,7 +78,6 @@
             font-weight: 600;
         }
 
-        /* Card body */
         .article-card-body {
             padding: 22px;
             display: flex;
@@ -151,7 +145,6 @@
             color: #92400e;
         }
 
-        /* Card footer */
         .article-card-footer {
             padding: 16px 22px;
             border-top: 1px solid #f1f5f9;
@@ -169,7 +162,6 @@
             flex: 1;
         }
 
-        /* Empty state */
         .empty-state {
             padding: 60px 20px;
             text-align: center;
@@ -183,7 +175,6 @@
             color: #94a3b8;
         }
 
-        /* Responsive */
         @media (max-width: 576px) {
             .page-heading h1 {
                 font-size: 1.45rem;
@@ -198,6 +189,12 @@
             }
         }
     </style>
+
+    {# Session counter #}
+    <div class="alert alert-info">
+        <i class="bi bi-eye me-2"></i>
+        Nombre de visites : {{ nbVisites }}
+    </div>
 
     {# Page heading #}
     <div class="page-heading d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -232,8 +229,7 @@
                         <h2 class="mb-0 fw-bold">{{ totalArticles }}</h2>
                     </div>
 
-                    <div class="rounded-3 p-3"
-                         style="background:#eef2ff;color:#4f46e5;">
+                    <div class="rounded-3 p-3" style="background:#eef2ff;color:#4f46e5;">
                         <i class="bi bi-files fs-3"></i>
                     </div>
                 </div>
@@ -249,8 +245,7 @@
                         <h2 class="mb-0 fw-bold">{{ articlesPublies }}</h2>
                     </div>
 
-                    <div class="rounded-3 p-3"
-                         style="background:#dcfce7;color:#15803d;">
+                    <div class="rounded-3 p-3" style="background:#dcfce7;color:#15803d;">
                         <i class="bi bi-check-circle fs-3"></i>
                     </div>
                 </div>
@@ -266,8 +261,7 @@
                         <h2 class="mb-0 fw-bold">{{ articlesBrouillons }}</h2>
                     </div>
 
-                    <div class="rounded-3 p-3"
-                         style="background:#fef3c7;color:#b45309;">
+                    <div class="rounded-3 p-3" style="background:#fef3c7;color:#b45309;">
                         <i class="bi bi-pencil-square fs-3"></i>
                     </div>
                 </div>
@@ -276,7 +270,82 @@
 
     </div>
 
-    {# Articles section #}
+    {# Latest published articles - QueryBuilder #}
+    <div class="mb-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold mb-0">
+                <i class="bi bi-clock-history me-2" style="color:#4f46e5;"></i>
+                Les 3 derniers articles publiés
+            </h4>
+
+            <span class="badge rounded-pill text-bg-success">
+                {{ derniersArticles|length }} article(s)
+            </span>
+        </div>
+
+        {% if derniersArticles is empty %}
+
+            <div class="alert alert-light border">
+                Aucun article publié pour le moment.
+            </div>
+
+        {% else %}
+
+            <div class="articles-grid">
+
+                {% for article in derniersArticles %}
+
+                    <div class="article-card">
+
+                        <div class="article-card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="article-icon">
+                                    <i class="bi bi-newspaper"></i>
+                                </div>
+
+                                <span class="article-id">
+                                    ARTICLE #{{ article.id }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="article-card-body">
+
+                            <h3 class="article-title">
+                                <a href="{{ path('app_article_detail', {'id': article.id}) }}">
+                                    {{ article.titre }}
+                                </a>
+                            </h3>
+
+                            <span class="article-status status-published">
+                                <i class="bi bi-check-circle"></i>
+                                Publié
+                            </span>
+
+                        </div>
+
+                        <div class="article-card-footer">
+
+                            <a href="{{ path('app_article_detail', {'id': article.id}) }}"
+                               class="btn btn-sm btn-outline-primary btn-view">
+                                <i class="bi bi-eye me-1"></i>
+                                Voir l'article
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+    {# All articles section #}
     <div class="card border-0 shadow-sm" style="border-radius:16px;">
 
         {# Section header #}
@@ -297,7 +366,6 @@
 
             {% if articles is empty %}
 
-                {# Empty state #}
                 <div class="empty-state">
                     <i class="bi bi-inbox empty-state-icon"></i>
 
@@ -307,8 +375,7 @@
                         Commencez par créer votre premier article.
                     </p>
 
-                    <a href="{{ path('app_article_nouveau') }}"
-                       class="btn btn-primary">
+                    <a href="{{ path('app_article_nouveau') }}" class="btn btn-primary">
                         <i class="bi bi-plus-lg me-2"></i>
                         Créer un article
                     </a>
@@ -316,7 +383,6 @@
 
             {% else %}
 
-                {# Articles displayed as cards #}
                 <div class="articles-grid">
 
                     {% for article in articles %}
@@ -343,7 +409,6 @@
                             {# Card body #}
                             <div class="article-card-body">
 
-                                {# Title #}
                                 <h3 class="article-title">
                                     <a href="{{ path('app_article_detail', {'id': article.id}) }}">
                                         {{ article.titre }}

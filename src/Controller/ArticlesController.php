@@ -8,24 +8,44 @@ use App\Repository\ArticleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class ArticlesController extends AbstractController
 {
-    // Afficher tous les articles
+    // Afficher tous les articles + compteur de visites
     #[Route('/articles', name: 'app_articles')]
-    public function index(
-        ArticleRepository $articleRepository
-    ): Response {
-        $articles = $articleRepository->findAll();
 
-        return $this->render('articles/index.html.twig', [
-            'articles' => $articles,
-        ]);
-    }
+public function index(
+    ArticleRepository $articleRepository,
+    RequestStack $requestStack
+): Response {
+    // Récupérer la session
+    $session = $requestStack->getSession();
 
+    // Récupérer le nombre de visites
+    $nbVisites = $session->get('nb_visites', 0);
+
+    // Incrémenter le compteur
+    $nbVisites++;
+
+    // Enregistrer le nouveau nombre
+    $session->set('nb_visites', $nbVisites);
+
+    // Récupérer tous les articles
+    $articles = $articleRepository->findAll();
+
+    // Récupérer les 3 derniers articles publiés
+    $derniersArticles = $articleRepository->findLastPublished(3);
+
+    return $this->render('articles/index.html.twig', [
+        'articles' => $articles,
+        'nbVisites' => $nbVisites,
+        'derniersArticles' => $derniersArticles,
+    ]);
+}
     // Créer un nouvel article
     #[Route('/articles/nouveau', name: 'app_article_nouveau')]
     #[IsGranted('ROLE_USER')]
@@ -44,13 +64,11 @@ class ArticlesController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $article->setAuteurUser($this->getUser());
+
             $em->persist($article);
             $em->flush();
 
-            $this->addFlash(
-                'success',
-                'Article créé avec succès !'
-            );
+            $this->addFlash('success', 'Article créé avec succès !');
 
             return $this->redirectToRoute('app_articles');
         }
@@ -85,14 +103,15 @@ class ArticlesController extends AbstractController
         Request $request,
         EntityManagerInterface $em
     ): Response {
-if (
-    $article->getAuteurUser() !== $this->getUser()
-    && !$this->isGranted('ROLE_ADMIN')
-) {
-    throw $this->createAccessDeniedException(
-        'Vous ne pouvez pas modifier cet article.'
-    );
-}
+        if (
+            $article->getAuteurUser() !== $this->getUser()
+            && !$this->isGranted('ROLE_ADMIN')
+        ) {
+            throw $this->createAccessDeniedException(
+                'Vous ne pouvez pas modifier cet article.'
+            );
+        }
+
         $form = $this->createForm(ArticleType::class, $article);
 
         $form->handleRequest($request);
@@ -129,14 +148,15 @@ if (
         Request $request,
         EntityManagerInterface $em
     ): Response {
-if (
-    $article->getAuteurUser() !== $this->getUser()
-    && !$this->isGranted('ROLE_ADMIN')
-) {
-    throw $this->createAccessDeniedException(
-        'Vous ne pouvez pas modifier cet article.'
-    );
-}
+        if (
+            $article->getAuteurUser() !== $this->getUser()
+            && !$this->isGranted('ROLE_ADMIN')
+        ) {
+            throw $this->createAccessDeniedException(
+                'Vous ne pouvez pas supprimer cet article.'
+            );
+        }
+
         if ($this->isCsrfTokenValid(
             'supprimer_' . $article->getId(),
             $request->request->get('_token')
